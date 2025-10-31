@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EvilLavrik</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #121212; 
+            color: #ffffff; 
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+
+        td {
+            border: 1px solid #555; 
+            padding: 5px;
+        }
+
+        input[type="number"] {
+            width: 60px;
+            text-align: center;
+            background-color: #2b2b2b;
+            color: #ffffff; 
+            border: 1px solid #555;
+        }
+
+        input, textarea {
+            margin: 5px 0;
+        }
+
+        button {
+            margin: 10px 0;
+            padding: 8px 16px;
+            font-size: 15px;
+            border-radius: 1px;
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #555;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #444;
+            }
+
+        #result {
+            white-space: pre-wrap;
+            background: #1e1e1e; 
+            color: #ffffff; 
+            padding: 10px;
+            border: 1px solid #555;
+            font-family: monospace;
+        }
+
+        .iteration-box {
+            display: inline-block;
+            border: 2px solid #781cad;
+            background-color: #330033;
+            padding: 4px 8px;
+            margin: 2px 0;
+            border-radius: 0px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dual Simplex Method Solver</h1>
+
+    <h3>Enter matrix A (3x5):</h3>
+    <table id="matrixA">
+        <tr>
+            <td><input type="number" value="0"></td>
+            <td><input type="number" value="0"></td>
+            <td><input type="number" value="2"></td>
+            <td><input type="number" value="0"></td>
+            <td><input type="number" value="-3"></td>
+        </tr>
+        <tr>
+            <td><input type="number" value="0"></td>
+            <td><input type="number" value="1"></td>
+            <td><input type="number" value="0"></td>
+            <td><input type="number" value="-4"></td>
+            <td><input type="number" value="2"></td>
+        </tr>
+        <tr>
+            <td><input type="number" value="2"></td>
+            <td><input type="number" value="0"></td>
+            <td><input type="number" value="1"></td>
+            <td><input type="number" value="0"></td>
+            <td><input type="number" value="0"></td>
+        </tr>
+    </table>
+
+    <h3>Enter vectors:</h3>
+
+    <label>b (3 elements):</label><br>
+    <table id="vectorB">
+        <tr>
+            <td><input type="number" value="5"></td>
+            <td><input type="number" value="7"></td>
+            <td><input type="number" value="4"></td>
+        </tr>
+    </table>
+
+    <label>c (5 elements):</label><br>
+    <table id="vectorC">
+        <tr>
+            <td><input type="number" value="2"></td>
+            <td><input type="number" value="2"></td>
+            <td><input type="number" value="5"></td>
+            <td><input type="number" value="-11"></td>
+            <td><input type="number" value="-6"></td>
+        </tr>
+    </table>
+
+    <label>Lower bounds d_min (5 elements):</label><br>
+    <table id="vectorDMin">
+        <tr>
+            <td><input type="number" value="-4"></td>
+            <td><input type="number" value="0"></td>
+            <td><input type="number" value="2"></td>
+            <td><input type="number" value="-1"></td>
+            <td><input type="number" value="1"></td>
+        </tr>
+    </table>
+
+    <label>Upper bounds d_max (5 elements):</label><br>
+    <table id="vectorDMax">
+        <tr>
+            <td><input type="number" value="3"></td>
+            <td><input type="number" value="5"></td>
+            <td><input type="number" value="8"></td>
+            <td><input type="number" value="4"></td>
+            <td><input type="number" value="9"></td>
+        </tr>
+    </table>
+
+    <label>Start vector x (5 elements) select random boundary values:</label><br>
+    <table id="vectorXStart">
+        <tr>
+            <td><input type="number" value="-4"></td>
+            <td><input type="number" value="0"></td>
+            <td><input type="number" value="2"></td>
+            <td><input type="number" value="-1"></td>
+            <td><input type="number" value="9"></td>
+        </tr>
+    </table>
+
+    <button onclick="runSimplex()">Run Dual Simplex Method</button>
+
+    <h2>Result (Indices are zero-based)</h2>
+<pre id="result">...</pre>
+
+    <script>
+        function getMatrixA() {
+            const table = document.getElementById("matrixA");
+            const rows = [...table.rows];
+            return rows.map(row => [...row.cells].map(cell => Number(cell.firstChild.value)));
+        }
+
+        function getVector(id) {
+            const table = document.getElementById(id);
+            const row = table.rows[0];
+            return [...row.cells].map(cell => Number(cell.firstChild.value));
+        }
+
+        function highlightIterations(text) {
+            const lines = text.split("\n").map(line => {
+                if (/Iteration/i.test(line)) {
+                    return `<span class="iteration-box">${line}</span>`;
+                }
+                return line;
+            });
+            return lines.join("\n");
+        }
+
+        async function runSimplex() {
+            const resultEl = document.getElementById("result");
+            resultEl.textContent = "Calculating...";
+
+            const A = getMatrixA();
+            const b = getVector("vectorB");
+            const c = getVector("vectorC");
+            const d_niz = getVector("vectorDMin");
+            const d_ver = getVector("vectorDMax");
+            const x_start = getVector("vectorXStart");
+
+            const input = { A, b, c, d_niz, d_ver, x_start };
+
+            const TIMEOUT_MS = 5000; 
+            let timeoutId;
+
+            const timeoutPromise = new Promise((_, reject) => {
+                timeoutId = setTimeout(() => {
+                    reject(new Error("timeout"));
+                }, TIMEOUT_MS);
+            });
+
+            const simplexPromise = new Promise((resolve, reject) => {
+                try {
+                    const res = Module.ccall("simplex_run", "string", ["string"], [JSON.stringify(input)]);
+                    resolve(res);
+                } catch (err) {
+                    reject(err);
+                }
+            });
+
+            try {
+                const res = await Promise.race([simplexPromise, timeoutPromise]);
+                clearTimeout(timeoutId);
+                const highlighted = highlightIterations(res);
+                resultEl.innerHTML = highlighted;
+            } catch (err) {
+                clearTimeout(timeoutId);
+                console.error("Simplex failed:", err);
+                resultEl.textContent = "Unprocessed case. Try another start vector (or there are no solutions idk)";
+            }
+        }
+    </script>
+
+    <script src="simplex.js"></script>
+</body>
+</html>
