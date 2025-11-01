@@ -503,6 +503,11 @@ string runSimplex(const Matrix& A_in,
             }
             if (flag2) {
                 criteri2 = 1;
+                out << "kappa (real plan now):" << endl;
+                for (auto i : kappa) {
+                    out << i << " ";
+                }
+                out << endl;
                 x = kappa;
                 break;
             }
@@ -565,8 +570,10 @@ string runSimplex(const Matrix& A_in,
 
             double max_ro = 0.0;
              j_zvezda = -1;
+             out << "basis components distances:" << endl;
             for (auto i : J_baz) {
                 double ro = distance_to_segment(kappa[i], d_niz[i], d_ver[i]);
+                out << "rho_" << i << " = " << ro << endl;
                 if (ro > max_ro) {
                     max_ro = ro;
                     j_zvezda = i;
