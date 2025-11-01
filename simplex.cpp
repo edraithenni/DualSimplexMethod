@@ -161,214 +161,216 @@ string runSimplex(const Matrix& A_in,
     const Vector& c_in,
     const Vector& d_niz,
     const Vector& d_ver,
-    const Vector& x_start)
+    const vector<size_t>& J_baz_input)
 {
     ostringstream out;
    // out << fixed << setprecision(6);
 
     try {
         Matrix A = A_in;
-        Vector x = x_start;
+        
 
         size_t rows = A.size();
         size_t orig_cols = A[0].size();
         Vector c = c_in;
-        out << "Phase 1 (nonsence in dual simplex method, only needed to find start basis. Will replace it with manual basis selection l8r)\n";
-        bool criteri = false;
+        Vector x(c.size(), 0.0);
+        vector<size_t> J_baz = J_baz_input;
+        //out << "Phase 1 (nonsence in dual simplex method, only needed to find start basis. Will replace it with manual basis selection l8r)\n";
+        //bool criteri = false;
 
-        Vector omega(rows);
-        for (size_t i = 0; i < rows; ++i) {
-            double sum = 0.0;
-            for (size_t j = 0; j < orig_cols; ++j)
-                sum += A[i][j] * x[j];
-            omega[i] = b[i] - sum;
-        }
+        //Vector omega(rows);
+        //for (size_t i = 0; i < rows; ++i) {
+        //    double sum = 0.0;
+        //    for (size_t j = 0; j < orig_cols; ++j)
+        //        sum += A[i][j] * x[j];
+        //    omega[i] = b[i] - sum;
+        //}
 
-        size_t art_cols = rows;
-        Vector x_art(art_cols, 0.0);
-        vector<size_t> J_baz;
+        //size_t art_cols = rows;
+        //Vector x_art(art_cols, 0.0);
+        //vector<size_t> J_baz;
 
-        for (size_t i = 0; i < rows; ++i) {
-            Vector col(rows, 0.0);
-            if (omega[i] >= 0) {
-                col[i] = 1.0;
-                x_art[i] = omega[i];
-            }
-            else {
-                col[i] = -1.0;
-                x_art[i] = -omega[i];
-            }
-            for (size_t r = 0; r < rows; ++r)
-                A[r].push_back(col[r]);
-            J_baz.push_back(orig_cols + i);
-        }
+        //for (size_t i = 0; i < rows; ++i) {
+        //    Vector col(rows, 0.0);
+        //    if (omega[i] >= 0) {
+        //        col[i] = 1.0;
+        //        x_art[i] = omega[i];
+        //    }
+        //    else {
+        //        col[i] = -1.0;
+        //        x_art[i] = -omega[i];
+        //    }
+        //    for (size_t r = 0; r < rows; ++r)
+        //        A[r].push_back(col[r]);
+        //    J_baz.push_back(orig_cols + i);
+        //}
 
-        out << "extended matrix A after adding artificial variables" << endl;
-        for (auto i : A) {
-            for (auto j : i) {
-                out << j << " ";
+        //out << "extended matrix A after adding artificial variables" << endl;
+        //for (auto i : A) {
+        //    for (auto j : i) {
+        //        out << j << " ";
 
-            }
-            out << endl;
-        }
-        out << "c = (0,0,0,0,0,-1,-1,-1)" << endl;
-        Vector d_niz1 = d_niz;
-        Vector d_ver1 = d_ver;
-        for (size_t i = 0; i < art_cols; ++i) {
-            d_niz1.push_back(0.0);
-            d_ver1.push_back(numeric_limits<double>::infinity());
-        }
+        //    }
+        //    out << endl;
+        //}
+        //out << "c = (0,0,0,0,0,-1,-1,-1)" << endl;
+        //Vector d_niz1 = d_niz;
+        //Vector d_ver1 = d_ver;
+        //for (size_t i = 0; i < art_cols; ++i) {
+        //    d_niz1.push_back(0.0);
+        //    d_ver1.push_back(numeric_limits<double>::infinity());
+        //}
 
-        x.insert(x.end(), x_art.begin(), x_art.end());
-        for (auto i : x) {
-            cout << i << " ";
-        }
-        cout<<endl;
-        set<size_t> allinds;
-        for (size_t i = 0; i < orig_cols + art_cols; ++i) allinds.insert(i);
+        //x.insert(x.end(), x_art.begin(), x_art.end());
+        //for (auto i : x) {
+        //    cout << i << " ";
+        //}
+        //cout<<endl;
+        //set<size_t> allinds;
+        //for (size_t i = 0; i < orig_cols + art_cols; ++i) allinds.insert(i);
 
-        Vector c1(orig_cols + art_cols, 0.0);
-        for (size_t i = 0; i < art_cols; ++i) c1[orig_cols + i] = -1.0;
-        int faza1iter = 0;
+        //Vector c1(orig_cols + art_cols, 0.0);
+        //for (size_t i = 0; i < art_cols; ++i) c1[orig_cols + i] = -1.0;
+        //int faza1iter = 0;
 
-        while (!criteri) {
-            ++faza1iter;
-            out << "Iteration " << faza1iter << "\n";
-            Matrix A_baz = selectColumns(A, J_baz);
-            Vector C_baz = selectElements(c1, J_baz);
-            Matrix A_baz_inv = inverse(A_baz);
-            Vector u = multiply(C_baz, A_baz_inv);
+        //while (!criteri) {
+        //    ++faza1iter;
+        //    out << "Iteration " << faza1iter << "\n";
+        //    Matrix A_baz = selectColumns(A, J_baz);
+        //    Vector C_baz = selectElements(c1, J_baz);
+        //    Matrix A_baz_inv = inverse(A_baz);
+        //    Vector u = multiply(C_baz, A_baz_inv);
 
-        
+        //
 
-            vector<size_t> J_nebaz;
-            set<size_t> J_nebaz_set = allinds;
-            out << "basis indices (J_b):\n";
-            for (auto& idx : J_baz) { out << idx << " "; J_nebaz_set.erase(idx); }
-            out << "\nplan:\n";
-            for (auto v : x) out << v << " ";
-            out << "\n";
+        //    vector<size_t> J_nebaz;
+        //    set<size_t> J_nebaz_set = allinds;
+        //    out << "basis indices (J_b):\n";
+        //    for (auto& idx : J_baz) { out << idx << " "; J_nebaz_set.erase(idx); }
+        //    out << "\nplan:\n";
+        //    for (auto v : x) out << v << " ";
+        //    out << "\n";
 
-            cout << "basis indices:\n";
-            for (auto& idx : J_baz) { cout << idx << " "; J_nebaz_set.erase(idx); }
-            cout << "\nplan:\n";
-            for (auto v : x) cout << v << " ";
-            cout << "\n";
+        //    cout << "basis indices:\n";
+        //    for (auto& idx : J_baz) { cout << idx << " "; J_nebaz_set.erase(idx); }
+        //    cout << "\nplan:\n";
+        //    for (auto v : x) cout << v << " ";
+        //    cout << "\n";
 
-            out << "u:    ";
-            for (auto i : u) {
-                out << i << " ";
-            }
-            out << endl;
+        //    out << "u:    ";
+        //    for (auto i : u) {
+        //        out << i << " ";
+        //    }
+        //    out << endl;
 
-            for (auto& idx : J_nebaz_set) J_nebaz.push_back(idx);
-            Vector ocenki(orig_cols + art_cols, numeric_limits<double>::infinity());
-            for (auto& j : J_nebaz) ocenki[j] = c1[j] - dot(getColumn(A, j), u);
+        //    for (auto& idx : J_nebaz_set) J_nebaz.push_back(idx);
+        //    Vector ocenki(orig_cols + art_cols, numeric_limits<double>::infinity());
+        //    for (auto& j : J_nebaz) ocenki[j] = c1[j] - dot(getColumn(A, j), u);
 
-            int flag = -1;
-            for (auto j : J_nebaz) {
-                bool in_bounds = (x[j] >= d_niz1[j] - 1e-12) && (x[j] <= d_ver1[j] + 1e-12);
-                if ((ocenki[j] <= 0 && x[j] == d_niz1[j]) || (ocenki[j] >= 0 && x[j] == d_ver1[j])) continue;
-                flag = (int)j; break;
-            }
-            if (flag == -1) { criteri = true; break; }
+        //    int flag = -1;
+        //    for (auto j : J_nebaz) {
+        //        bool in_bounds = (x[j] >= d_niz1[j] - 1e-12) && (x[j] <= d_ver1[j] + 1e-12);
+        //        if ((ocenki[j] <= 0 && x[j] == d_niz1[j]) || (ocenki[j] >= 0 && x[j] == d_ver1[j])) continue;
+        //        flag = (int)j; break;
+        //    }
+        //    if (flag == -1) { criteri = true; break; }
 
-           
+        //   
 
-            out << "deltas:  " << endl;
-            //for (int i = 0; i < ocenki.size(); ++i) {
-            //    out << "delta_" << i << " = " << ocenki[i] << endl;
-          //  }
-            for (auto i : J_nebaz) {
-                out << "delta_" << i << " = " << ocenki[i] << endl;
-            }
+        //    out << "deltas:  " << endl;
+        //    //for (int i = 0; i < ocenki.size(); ++i) {
+        //    //    out << "delta_" << i << " = " << ocenki[i] << endl;
+        //  //  }
+        //    for (auto i : J_nebaz) {
+        //        out << "delta_" << i << " = " << ocenki[i] << endl;
+        //    }
 
-            out << "j_0: " << flag << endl;
+        //    out << "j_0: " << flag << endl;
 
-            Vector l(orig_cols + art_cols);
-            l[flag] = sgn(ocenki[flag]);
+        //    Vector l(orig_cols + art_cols);
+        //    l[flag] = sgn(ocenki[flag]);
 
-            Vector minusAsignOcenka = getColumn(A, flag);
-            for (auto& i : minusAsignOcenka) {
-                i *= -sgn(ocenki[flag]);
-            }
-            Vector l_baz(J_baz.size());
-            for (auto& i : J_baz) {
-                l_baz = multiply(inverse(A_baz), minusAsignOcenka);
-            }
+        //    Vector minusAsignOcenka = getColumn(A, flag);
+        //    for (auto& i : minusAsignOcenka) {
+        //        i *= -sgn(ocenki[flag]);
+        //    }
+        //    Vector l_baz(J_baz.size());
+        //    for (auto& i : J_baz) {
+        //        l_baz = multiply(inverse(A_baz), minusAsignOcenka);
+        //    }
 
-           /* Vector minusAsignOcenka = getColumn(A, flag);
-            for (auto& v : minusAsignOcenka)
-                v *= -sgn(ocenki[flag]);
+        //   /* Vector minusAsignOcenka = getColumn(A, flag);
+        //    for (auto& v : minusAsignOcenka)
+        //        v *= -sgn(ocenki[flag]);
 
-            Vector l_baz = multiply(A_baz_inv, minusAsignOcenka);*/
+        //    Vector l_baz = multiply(A_baz_inv, minusAsignOcenka);*/
 
-            int cnt = 0;
-            for (auto idx : J_baz)
-                l[idx] = l_baz[cnt++];
+        //    int cnt = 0;
+        //    for (auto idx : J_baz)
+        //        l[idx] = l_baz[cnt++];
 
 
-         //   Vector l(orig_cols + art_cols, 0.0);
-         //   l[flag] = sgn(ocenki[flag]);
-            for (auto& j : J_nebaz) if (j != flag) l[j] = 0;
-         //   Vector minusAsignOcenka = getColumn(A, flag);
-         //   for (auto& v : minusAsignOcenka) v *= -sgn(ocenki[flag]);
-         //   Vector l_baz = multiply(A_baz_inv, minusAsignOcenka);
-         //   int cnt = 0;
-         //   for (auto idx : J_baz) l[idx] = l_baz[cnt++];
+        // //   Vector l(orig_cols + art_cols, 0.0);
+        // //   l[flag] = sgn(ocenki[flag]);
+        //    for (auto& j : J_nebaz) if (j != flag) l[j] = 0;
+        // //   Vector minusAsignOcenka = getColumn(A, flag);
+        // //   for (auto& v : minusAsignOcenka) v *= -sgn(ocenki[flag]);
+        // //   Vector l_baz = multiply(A_baz_inv, minusAsignOcenka);
+        // //   int cnt = 0;
+        // //   for (auto idx : J_baz) l[idx] = l_baz[cnt++];
 
-            Vector tetas(orig_cols + art_cols, numeric_limits<double>::infinity());
-            for (int j = 0; j < (int)tetas.size(); ++j) {
-                if (l[j] > 0) tetas[j] = (d_ver1[j] - x[j]) / l[j];
-                else if (l[j] < 0) tetas[j] = (d_niz1[j] - x[j]) / l[j];
-            }
-            double teta_min = numeric_limits<double>::infinity();
+        //    Vector tetas(orig_cols + art_cols, numeric_limits<double>::infinity());
+        //    for (int j = 0; j < (int)tetas.size(); ++j) {
+        //        if (l[j] > 0) tetas[j] = (d_ver1[j] - x[j]) / l[j];
+        //        else if (l[j] < 0) tetas[j] = (d_niz1[j] - x[j]) / l[j];
+        //    }
+        //    double teta_min = numeric_limits<double>::infinity();
 
-            cout << "tetas: " << endl;
-            for (auto i : tetas) {
-                cout << i << " ";
-            }
-            cout << endl;
-            cout << "l: " << endl;
-            for (auto i : l) {
-                cout << i << " ";
-            }
-            cout << endl;
+        //    cout << "tetas: " << endl;
+        //    for (auto i : tetas) {
+        //        cout << i << " ";
+        //    }
+        //    cout << endl;
+        //    cout << "l: " << endl;
+        //    for (auto i : l) {
+        //        cout << i << " ";
+        //    }
+        //    cout << endl;
 
-            out << "thetas: " << endl;
-            for (int i = 0; i < tetas.size(); ++i) {
-                out << "theta_" << i << " = " << tetas[i] << endl;
-            }
-            out << endl;
-            out << "l: ";
-            for (auto i : l) {
-                out << i << " ";
-            }
-            out << endl;
+        //    out << "thetas: " << endl;
+        //    for (int i = 0; i < tetas.size(); ++i) {
+        //        out << "theta_" << i << " = " << tetas[i] << endl;
+        //    }
+        //    out << endl;
+        //    out << "l: ";
+        //    for (auto i : l) {
+        //        out << i << " ";
+        //    }
+        //    out << endl;
 
-            int j_zvezda = -1;
-            for (int j = 0; j < (int)tetas.size(); ++j) {
-                if (tetas[j] < teta_min) { teta_min = tetas[j]; j_zvezda = j; }
-            }
-            if (j_zvezda == -1) throw runtime_error("Unbounded in phase 1");
-            out << "min theta idx: " << j_zvezda << endl;
+        //    int j_zvezda = -1;
+        //    for (int j = 0; j < (int)tetas.size(); ++j) {
+        //        if (tetas[j] < teta_min) { teta_min = tetas[j]; j_zvezda = j; }
+        //    }
+        //    if (j_zvezda == -1) throw runtime_error("Unbounded in phase 1");
+        //    out << "min theta idx: " << j_zvezda << endl;
 
-            for (auto& v : l) v *= teta_min;
-            x = add(x, l);
+        //    for (auto& v : l) v *= teta_min;
+        //    x = add(x, l);
 
-            auto it = find(J_baz.begin(), J_baz.end(), (size_t)j_zvezda);
-            if (it != J_baz.end()) *it = (size_t)flag;
-            else J_baz[0] = (size_t)flag;
-        }
+        //    auto it = find(J_baz.begin(), J_baz.end(), (size_t)j_zvezda);
+        //    if (it != J_baz.end()) *it = (size_t)flag;
+        //    else J_baz[0] = (size_t)flag;
+        //}
 
-        out << "x after phase1:\n";
-        for (auto v : x) out << v << " ";
-        out << "\n";
+        //out << "x after phase1:\n";
+        //for (auto v : x) out << v << " ";
+        //out << "\n";
 
       //  x.resize(orig_cols);
-        x.pop_back();
-        x.pop_back();
-        x.pop_back();
+       // x.pop_back();
+       // x.pop_back();
+       // x.pop_back();
         Matrix A_phase2 = A_in;
         c = c_in;
         Vector d_niz2(d_niz.begin(), d_niz.begin() + orig_cols);
@@ -469,7 +471,7 @@ string runSimplex(const Matrix& A_in,
                 }
             }
            
-            Vector kappa_nebaz(2);
+            Vector kappa_nebaz(J_nebaz.size());
             int counter = 0;
             for (auto i : J_nebaz) {
                 kappa_nebaz[counter++] = kappa[i];
@@ -477,7 +479,7 @@ string runSimplex(const Matrix& A_in,
            // Matrix A_nebaz = selectColumns(A_phase2, J_nebaz);
             //Matrix A_baz_inv = inverse(A_baz);
             Vector Aneaun = multiply(A_nebaz, kappa_nebaz);
-            Vector kappa_baz(3);
+            Vector kappa_baz(J_baz.size());
             for (auto& i : Aneaun) {
                 
                     i*=-1;
@@ -581,7 +583,7 @@ string runSimplex(const Matrix& A_in,
             out << "max rho (max distance to acceptable values among all kappas): " << max_ro << endl;
             out << "j_*: " << j_zvezda << endl;
             Vector l_u(orig_cols);
-            Vector l_u_baz(3);
+            Vector l_u_baz(J_baz.size());
             /*Vector prav_chast(3,0);
             prav_chast[j_zvezda] = -sgn(kappa[j_zvezda] - x[j_zvezda]);
             l_u_baz = multiply(A_baz_inv, prav_chast);*/
@@ -699,8 +701,13 @@ extern "C" {
             Vector c = j["c"].get<Vector>();
             Vector d_niz = j["d_niz"].get<Vector>();
             Vector d_ver = j["d_ver"].get<Vector>();
-            Vector x_start = j["x_start"].get<Vector>(); // expects length 8 (start for extended A)
-            string out = runSimplex(A, b, c, d_niz, d_ver, x_start);
+            //Vector x_start = j["x_start"].get<Vector>(); // expects length 8 (start for extended A)
+
+            //string out = runSimplex(A, b, c, d_niz, d_ver, x_start);
+
+            vector<size_t> J_baz = j["J_baz"].get<vector<size_t>>();
+
+            string out = runSimplex(A, b, c, d_niz, d_ver, J_baz);
             return strdup(out.c_str());
         }
         catch (exception& e) {

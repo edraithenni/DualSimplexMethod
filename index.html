@@ -142,14 +142,12 @@
         </tr>
     </table>
 
-    <label>Start vector x (5 elements) select random boundary values:</label><br>
-    <table id="vectorXStart">
+    <label>Enter basis indices (3 elements, zero-based):</label><br>
+    <table id="basisIndices">
         <tr>
-            <td><input type="number" value="-4"></td>
             <td><input type="number" value="0"></td>
+            <td><input type="number" value="1"></td>
             <td><input type="number" value="2"></td>
-            <td><input type="number" value="-1"></td>
-            <td><input type="number" value="9"></td>
         </tr>
     </table>
 
@@ -190,11 +188,13 @@
             const c = getVector("vectorC");
             const d_niz = getVector("vectorDMin");
             const d_ver = getVector("vectorDMax");
-            const x_start = getVector("vectorXStart");
+           // const x_start = getVector("vectorXStart");
+            const J_baz = getVector("basisIndices").map(v => Math.floor(v));
 
-            const input = { A, b, c, d_niz, d_ver, x_start };
+          //  const input = { A, b, c, d_niz, d_ver, x_start };
+            const input = { A, b, c, d_niz, d_ver, J_baz };
 
-            const TIMEOUT_MS = 5000; 
+            const TIMEOUT_MS = 5000;
             let timeoutId;
 
             const timeoutPromise = new Promise((_, reject) => {
