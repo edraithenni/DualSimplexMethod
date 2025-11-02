@@ -599,7 +599,15 @@ string runSimplex(const Matrix& A_in,
             auto it = find(J_baz.begin(), J_baz.end(), j_zvezda);
             if (it != J_baz.end()) {
                 size_t idx_in_basis = distance(J_baz.begin(), it);
-                prav_chast[idx_in_basis] = -sgn(kappa[j_zvezda] - x[j_zvezda]);
+                if (kappa[j_zvezda] < d_niz2[j_zvezda]) {
+                    prav_chast[idx_in_basis] = 1;
+                }
+                else if (kappa[j_zvezda] > d_ver2[j_zvezda]) {
+                    prav_chast[idx_in_basis] = -1;
+                }
+                else {
+                    prav_chast[idx_in_basis] = 0;
+                }
             }
             else {
                 throw runtime_error("j_zvezda not in basis");
